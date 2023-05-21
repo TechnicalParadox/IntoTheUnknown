@@ -1,6 +1,6 @@
-from flask import render_template, Flask, jsonify, request
+from flask import render_template, Flask#, jsonify, request
 from game import app
-from game_logic import initialize_game_state, describe_situation, handle_action
+# from game_logic import initialize_game_state, describe_situation, handle_action
 
 app = Flask(__name__)
 
@@ -8,6 +8,7 @@ app = Flask(__name__)
 def home():
     return render_template('home.html')
 
+'''
 @app.route('/start', methods=['GET'])
 def start_game():
     game_state = initialize_game_state()
@@ -21,3 +22,4 @@ def handle_action_route():
     game_state = handle_action(game_state, action)
     situation = describe_situation(game_state)
     return jsonify({'game_state': game_state, 'situation': situation})
+'''
