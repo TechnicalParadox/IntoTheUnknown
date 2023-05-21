@@ -10,7 +10,9 @@ def initialize_game_state():
         "location": "Earth",
         "ship_condition": "Good",
         "resources": [],
+        "chat_history": []
     }
+
 
 def describe_situation(game_state):
     response = openai.ChatCompletion.create(
@@ -27,17 +29,22 @@ def describe_situation(game_state):
                 "content": "You are the ships AI, fully-functional and the only means of interacting with the ship or it's systems and your responses are my only means of determining system information. Introduce yourself, describe my situation and the status of the ship, then prompt me for the next action."
             }
         ]
+        # TODO: revise prompt to get more detailed responses from the AI.
     )
     
     game_state['ai_response_prev'] = response['choices'][0]['message']['content']
+    
+    # Keep 5 previous AI responses/5 previous user inputs in chat_history array.
+    game_state['chat_history'].append(response['choices'][0]['message']['content'])
 
     return response['choices'][0]['message']['content']
 
 def handle_action(game_state, action):
+    # TODO: revise prompt to get more detailed responses from the AI.
     m = [
             {
                 "role": "system",
-                "content": f"You are piloting a spaceship through the galaxy. You are currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}. Previous AI response: {game_state['ai_response_prev'] if 'ai_response_prev' in game_state else 'none'}"
+                "content": f"You are piloting a spaceship through the galaxy. You are currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}. Previous AI response: {game_state['ai_response_prev'] if 'ai_response_prev' in game_state else 'none'}. Chat History (Context): {''.join(game_state['chat_history']) if game_state['chat_history'] else 'none'}."
             },
             {
                 "role": "user",
@@ -54,6 +61,16 @@ def handle_action(game_state, action):
 
     # Extract the AI's response from the chat completion.
     ai_response = response['choices'][0]['message']['content']
+
+    # Keep 5 previous AI responses/5 previous user inputs in chat_history array.
+    game_state['chat_history'].append('USER INPUT: '+action)
+    game_state['chat_history'].append('SHIP AI: '+ai_response)
+    if len(game_state['chat_history']) > 10:
+        game_state['chat_history'] = game_state['chat_history'][-6:]
+    history = ''
+    for i in range(len(game_state['chat_history'])):
+        history += game_state['chat_history'][i] + '\n'
+    print ('\nGAME STATE CHAT HISTORY\n' + history + '\n')
 
     # List of phrases that might indicate a successful move.
     success_phrases = [
