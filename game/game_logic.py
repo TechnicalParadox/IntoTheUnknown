@@ -12,28 +12,10 @@ def initialize_game_state():
         "resources": [],
     }
 
-def game_loop():
-    game_state = initialize_game_state()
-
-    while True:
-        situation = describe_situation(game_state)
-        print(situation)
-
-        # TODO: Use GPT-3.5-turbo to generate a description of the current situation.
-
-        action = input("What do you want to do? ")
-        game_state = handle_action(game_state, action)
-
-        if check_game_end(game_state):
-            print("You've reached the end of your journey...")
-            break
-
-def check_game_end(game_state):
-    return game_state["location"] == "edge of the galaxy" and game_state["ship_condition"] == "Good" and game_state["resources"]
-
 def describe_situation(game_state):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
+        temperature=0.5,
         messages=
         [
             {
@@ -42,27 +24,33 @@ def describe_situation(game_state):
             },
             {
                 "role": "user",
-                "content": "Describe my situation."
+                "content": "You are the ships AI, fully-functional and the only means of interacting with the ship or it's systems and your responses are my only means of determining system information. Introduce yourself, describe my situation and the status of the ship, then prompt me for the next action."
             }
         ]
     )
     
+    game_state['ai_response_prev'] = response['choices'][0]['message']['content']
+
     return response['choices'][0]['message']['content']
 
 def handle_action(game_state, action):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
+    m = [
             {
                 "role": "system",
-                "content": f"You are piloting a spaceship through the galaxy. You are currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}."
+                "content": f"You are piloting a spaceship through the galaxy. You are currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}. Previous AI response: {game_state['ai_response_prev'] if 'ai_response_prev' in game_state else 'none'}"
             },
             {
                 "role": "user",
-                "content": action
+                "content": "You are the ships AI, fully-functional and the only means of interacting with the ship or it's systems and your responses are my only means of determining system information. Action: " + action
             }
-        ]
+    ]
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        temperature=1,
+        messages=m
     )
+
+    print(m)
 
     # Extract the AI's response from the chat completion.
     ai_response = response['choices'][0]['message']['content']
@@ -96,6 +84,8 @@ def handle_action(game_state, action):
         "we must make sure that"
         # Add more phrases as needed.
     ]
+
+    game_state['ai_response_prev'] = ai_response
 
     # Check if any of the failure phrases are in the AI's response.
     for phrase in failure_phrases:
