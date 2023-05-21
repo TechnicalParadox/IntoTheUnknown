@@ -6,8 +6,7 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def initialize_game_state():
-    return
-    {
+    return {
         "location": "Earth",
         "ship_condition": "Good",
         "resources": [],
@@ -72,5 +71,3 @@ def handle_action(game_state, action):
 
     # TODO: Update the game state based on the action.
     return game_state
-
-# __all__ = ["initialize_game_state", "describe_situation", "handle_action"]
