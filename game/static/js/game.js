@@ -36,7 +36,7 @@ function submitAction() {
         .then(data => {
             if (data) {
                 document.getElementById('situation').textContent = data.situation;
-                gameState = data.game_state;  // add this line
+                gameState = data.game_state;
             }
             document.getElementById('loading').style.display = 'none';
         })

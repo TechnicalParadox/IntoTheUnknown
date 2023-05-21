@@ -22,6 +22,6 @@ def perform_action():
     print("perform action endpoint hit")
     game_state = request.json['game_state']
     action = request.json['action']
-    game_state = handle_action(game_state, action)
-    situation = describe_situation(game_state)
+    game_state, situation = handle_action(game_state, action)
+
     return jsonify({'game_state': game_state, 'situation': situation})
