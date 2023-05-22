@@ -10,7 +10,8 @@ def initialize_game_state():
         "location": "Earth",
         "ship_condition": "Good",
         "resources": [],
-        "chat_history": []
+        "chat_history": [],
+        "id_generator": 0 # Will be incremented as each object is created. For example, the player will become a Captain(CrewMember) with id 0, the ship will become a Ship with id 1, the first discovered location will become a POI with id 2, a new crew member will become a CrewMember with id 3. An easy way to ensure IDs are unique in a player's instance of the game.
     }
 
 
