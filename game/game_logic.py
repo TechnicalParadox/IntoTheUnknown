@@ -22,11 +22,11 @@ def describe_situation(game_state):
         [
             {
                 "role": "system",
-                "content": f"You are piloting a spaceship through the galaxy. You are currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}."
+                "content": f"You are the main ship AI. The spaceship is currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}."
             },
             {
                 "role": "user",
-                "content": "You are the ships AI, fully-functional and the only means of interacting with the ship or it's systems and your responses are my only means of determining system information. Introduce yourself, describe my situation and the status of the ship, then prompt me for the next action."
+                "content": "AI, provide a status report of the ship and its current location."
             }
         ]
         # TODO: revise prompt to get more detailed responses from the AI.
@@ -41,15 +41,18 @@ def describe_situation(game_state):
 
 def handle_action(game_state, action):
     # TODO: revise prompt to get more detailed responses from the AI.
+    chat_history = game_state['chat_history'][-5:]
+    chat_history_formatted = ' '.join(chat_history)
+
     m = [
-            {
-                "role": "system",
-                "content": f"You are piloting a spaceship through the galaxy. You are currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}. Previous AI response: {game_state['ai_response_prev'] if 'ai_response_prev' in game_state else 'none'}. Chat History (Context): {''.join(game_state['chat_history']) if game_state['chat_history'] else 'none'}."
-            },
-            {
-                "role": "user",
-                "content": "You are the ships AI, fully-functional and the only means of interacting with the ship or it's systems and your responses are my only means of determining system information. Action: " + action
-            }
+        {
+            "role": "system",
+            "content": f"You are the main ship AI. The spaceship is currently at {game_state['location']}. Your spaceship is in {game_state['ship_condition']} condition. Your resources: {', '.join(game_state['resources']) if game_state['resources'] else 'none'}. Recent chat history: {chat_history_formatted}"
+        },
+        {
+            "role": "user",
+            "content": f"AI, {action}."
+        }
     ]
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
